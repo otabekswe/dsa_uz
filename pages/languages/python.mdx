@@ -324,6 +324,217 @@ def search(self, value: any) -> bool:
 
 Qolgan methodlarni esa o'zingiz talabdan kelib chiqib tuzasiz degan umiddaman. Asosiysi biz uni qanday implement qilishni tushunib oldik!
 
-### Doubly Linked List 
+### Doubly Linked List
+
+Doubly Linked List (DLL) -- bu haqida [bu yerda](https://www.dsalgo.uz/datastructure/linkedlist#doubly-linked-list) qisqacha tanishib oldik. Endi esa DLL ni python dagi implementatsiyasini ko'rib chiqamiz.
+
+Singly Linked List'dan farqli o'laroq.
+> Doubly Linked List - oldinga va orqaga osongina o'tish mumkin bo'lgan ma'lumotlar tuzilmasi hisoblanadi.
+
+DLL'da element qo'shish, olib tashlash va boshqa amallarni yanada qulayroq bajarish mumkin, chunki har bir node avvalgi va keyingi elementlar haqida ma'lumotga ega.
+
+![Strukturasi](../../images/doubly-linked-list-created.png)
+Keling endi DLL'ni yaratishni boshlaymiz.
+
+```py showLineNumbers filename="Doubly_linked_list.py"
+class Node:
+    def __init__(self, value: any) -> None:
+        self.value = value
+        self.next = None  # Keyingi node'ga ko'rsatkich
+        self.prev = None  # Avvalgi node'ga ko'rsatkich
+
+class DoublyLinkedList:
+    def __init__(self) -> None:
+        self.head = None  # Ro'yxatning boshini saqlovchi ko'rsatkich
+        self.tail = None  # Ro'yxatning oxirini saqlovchi ko'rsatkich
+
+my_list = DoublyLinkedList()
+```
+Yuqoridagi misolda biz oddiy Doubly Linked List ni yaratdik va ko'rib tuganizdek Singly Linked List bilan taqqoslaganda juda katta farq mavjud emas. Faqatgina `Node` klassiga yangi '`prev`' va `DoublyLinkedList` klassiga '`tail`' attributelarini qo'shyapmiz. Bu bizga ro'yxatni boshidan ham, oxiridan ham osongina manipulatsiya qilish imkonin beradi. Va Natijada biz __Doubly Linked List__ klassini yaratdik.
+
+Yana usha muammo, qanday qilib biz DoublyLinkedList'ga `Node`larni qo'shib boramiz?
+
+![Strukturasi](../../images/DoublyLinkedList.png)
+
+__Element qo'shish(Append):__
+
+Keling, yangi elementni Doubly Linked List oxiriga qo'shish uchun mehtod yaratamiz. Yuqoridagidek biz methodni o'zini yozib ketamiz, siz ularni o'z klassingiz ichiga qo'shib tahlil qilishingiz mumkin:
+
+```py showLineNumbers filename="Doubly_linked_list.py"
+def append(self, value: any) -> None:
+    # Birinchi bo'lib Node classidan yangi object yaratib olamiz.
+    new_node = Node(value)
+    
+    # Agar ro'yxat bo'sh bo'lsa, head va tail bir xil bo'ladi
+    if self.head is None:
+        self.head = new_node
+        self.tail = new_node
+        return
+
+    # Ro'yxat bo'sh bo'lmasa, oxirgi node'ni yangilaymiz
+    new_node.prev = self.tail  # Yangi node'ning prev'ini oxirgi node'ga bog'laymiz
+    self.tail.next = new_node  # Oxirgi node'ning next'ini yangi node'ga bog'laymiz
+    self.tail = new_node       # Tailni yangi node'ga o'tkazamiz
+```
+
+Yuqoridagi methodda agar ro'yxat bo'sh bo'lsa, yangi elementni `head` va `tail`ga qo'shamiz. Agarda bo'sh bo'lmasa, oxirgi node'ni yangilab qo'yamiz.
+
+__Element qo'shish (Insert):__
+Yangi `Node`ni ro'yxat boshiga qo'shish uchun method yaratamiz:
+
+```py showLineNumbers filename="Doubly_linked_list.py"
+def insert(self, value: any) -> None:
+    # Birinchi bo'lib Node classidan yangi object yaratib olamiz.
+    new_node = Node(value)
+    
+    # Agar ro'yxat bo'sh bo'lsa, head va tail bir xil bo'ladi
+    if self.head is None:
+        self.head = new_node
+        self.tail = new_node
+        return
+
+    # Ro'yxat bo'sh bo'lmasa, yangi node'ni boshiga qo'shamiz
+    new_node.next = self.head  # Yangi node'ning next'ini hozirgi head'ga bog'laymiz
+    self.head.prev = new_node  # Hozirgi head'ning prev'ini yangi node'ga bog'laymiz
+    self.head = new_node       # Headni yangi node'ga o'tkazamiz
+```
+
+Yuqoridagi metodda agar ro'yxat bo'sh bo'lsa, yangi node'ni `head` va `tail`ga bog'laymiz. Aks holda, yangi node'ni boshiga qo'shib, `head`ni yangilab qo'yamiz.
+
+__Elementni olib tashlash (Remove):__
+
+Elementlarni qiymat asosida olib tashlash uchun method yaratamiz.
+
+```py showLineNumbers filename="Doubly_linked_list.py"
+def remove(self, value: any) -> bool:
+    # Ro'yxat bo'sh bo'lsa False qaytaramiz.
+    if self.head is None:
+        return False
+
+    # node ni ro'yxat boshiga to'g'irlab olamiz.
+    current_node = self.head
+    
+    # 
+    while current_node:
+        if current_node.value == value:
+            # Agar node ro'yxatning boshida bo'lsa.
+            if current_node == self.head:
+                self.head = current_node.next
+                if self.head:
+                    self.head.prev = None
+
+            # Agar node ro'yxatning oxirida bo'lsa.
+            elif current_node == self.tail:
+                self.tail = current_node.prev
+                if self.tail:
+                    self.tail.next = None
+
+            # Agar node ro'yxatning o'rtasida bo'lsa, yani ro'yxatning boshi va oxiri orasida bo'lsa.
+            else:
+                current_node.prev.next = current_node.next
+                current_node.next.prev = current_node.prev
+            return True
+
+        # agar node qiymati berilgan qiymatga teng bo'lmasa keyingi node ni tekshiramiz.    
+        current_node = current_node.next
+    return False
+```
+Yuqoridagi method node'ni qiymati asosida olib tashlaydi. U boshida, oxirida yoki o'rtasida bo'lishidan qat'iy nazar, tegishli bog'lanishlarni yangilaydi.
+
+Endi biz quyidagi 2 ta methodni ko'rib chiqamiz.
+
+```py showLineNumbers filename="Doubly_linked_list.py"
+
+# Bu method tailni (ya'ni oxirgi elementni) qaytarish uchun.
+# Biror qiymatni qidirish uchun ishlatiladi agar bo'lsa True bo'lmasa False qaytaradi.
+def search(self, value: any) -> bool:
+    # Agar Linked List bo'sh bo'lsa False qaytaradi qidirmasdan turib.
+    if self.head_node is None:
+        return False
+    # Agar qiymatlar bo'lsa, iteratsiya qilib ularni qiymatini tekshiriladi.
+    current_node = self.head_node
+    while current_node:
+        if current_node.value == value:
+            return True
+        current_node = current_node.next
+    return False
+
+# Listdagi barcha node qiymatlarni oxiridan boshlab list ga qo'shadi.
+def print_reverse_list(self) -> None:
+    result = []
+    # Agar tail None bo'lsa, linked list bo'sh bo'ladi va [] qaytaradi.
+    if self.tail is None:
+        return result
+    
+    # Tail'dan boshlanib, orqaga qarab har bir nodeni qiymatini listga qo'shamiz.
+    current_node = self.tail
+    while current_node:
+        result.append(current_node.value)
+        current_node = current_node.prev
+
+    # Natijani chiqarish
+    print(result)
+```
+__Boshqa method'larchi?__
+
+Ko'rib turganingizdek, `print_reverse_list()` method'idan farqli ravishda `search()` ya'ni qidirish metodi biz yuqorida Singly Linked List uchun yaratganimiz bilan bir xil. Qolganlari ham katta farq qilmaydi. Shuning uchun qo'shimcha method'larni o'zingiz yaratib, amaliyot qilshingizga undab qolgan bo'lardim. Masalan, `get_head()`, `print_list()`, `is_empty()` va boshqa methodlarni.
+
+__Doubly Linked Listdan Foydalanish Misoli__
+
+Keling, Doubly Linked Listning qanday ishlashini ko'rib chiqamiz. Biz elementlar qo'shib, ularni bosqichma-bosqich namoyish qilamiz, Singly Linked List misolidagi kabi.
+
+```py showLineNumbers filename="Doubly_linked_list.py"
+
+# Doubly Linked Listni yaratish va elementlar qo'shish
+my_list = DoublyLinkedList()
+my_list.append(1)  # Listga 1 qo'shildi
+my_list.append(2)  # Listga 2 qo'shildi
+my_list.append(3)  # Listga 3 qo'shildi
+my_list.insert(0)  # Boshiga 0 elementi qo'shildi
+
+# List hozir quyidagicha ko'rinishga ega: 0 <-> 1 <-> 2 <-> 3 -> None
+```
+Doubly Linked Listni Traverse(elementlarni ko'rib chiqish) qilish.
+
+1. `Head`dan `tail`gacha oldinga harakatlanish:
+```py showLineNumbers filename="Doubly_linked_list.py"
+current_node = my_list.head
+while current_node:
+    print(current_node.value)  # Natijada quyidagi qiymatlar chiqadi: 0, 1, 2, 3
+    current_node = current_node.next
+```
+2. `Tail`dan `head`gacha orqaga harakatlanish:
+```py showLineNumbers filename="Doubly_linked_list.py"
+current_node = my_list.tail
+while current_node:
+    print(current_node.value)  # Natijada quyidagi qiymatlar chiqadi: 3, 2, 1, 0
+    current_node = current_node.prev
+```
+
+Doubly Linked Listning To'liq Ko'rinishi:
+Agar kodni to'liq ko'rish va ishlashini tushunishni istasangiz, quyidagi misolni o'zingiz albatta sinab ko'ring.
+
+```py showLineNumbers filename="Doubly_linked_list.py"
+# Bu yerda biz Doubly Linked List yaratamiz va metodlarni sinab ko'ramiz.
+my_list = DoublyLinkedList()
+my_list.append(10)  # Listga 10 qo'shildi
+my_list.append(20)  # Listga 20 qo'shildi
+my_list.append(30)  # Listga 30 qo'shildi
+my_list.insert(5)   # List boshiga 5 qo'shildi
+
+# Hozirgi holat: None <- 5 <-> 10 <-> 20 <-> 30 -> None
+
+# Listni chop etish
+my_list.print_list()  # Natija: [5, 10, 20, 30]
+
+# Listni teskari holatida chop etish
+my_list.print_reverse_list()  # Natija: [30, 20, 10, 5]
+```
+Hozirgacha "`Doubly Linked List`"ni yaxshi tushunib oldingiz degan umiddaman.
+
+Qo'shimcha o'rganish uchun manbalar:
+1. [wikipedia](https://en.wikipedia.org/wiki/Doubly_linked_list)
+2. [geeksforgeeks](https://www.geeksforgeeks.org/doubly-linked-list/)
+3. [Design Linked List](https://leetcode.com/problems/design-linked-list/description/)
 
 ### Circular Linked List 
